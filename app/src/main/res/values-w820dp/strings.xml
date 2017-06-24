@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="main_greater">Hello Mark, how are you today?</string>
+    <string name="button_start_working">Start Working</string>
+    <string name="button_finish_working">Finish Working</string>
+</resources>
