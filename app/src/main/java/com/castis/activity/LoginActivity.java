@@ -163,7 +163,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // do login
             URL url = null;
             try {
-                url = new URL("http://192.168.108.105:8000/account/login");
+                url = new URL("http://192.168.0.108:8000/account/login");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -272,8 +272,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         Log.i(TAG, response);
         ResponseObject obj = new ResponseObject();
         Gson gsonParser = new Gson();
+        JSONObject responseJson = null;
         try {
-//            JSONObject responseJson = new JSONObject(response);
+            responseJson = new JSONObject(response);
             obj = gsonParser.fromJson(response, ResponseObject.class);
 
         } catch (Exception e) {
@@ -282,10 +283,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
         if (obj.getStatusCode() == 200) {
             User user = new User();
-            user = gsonParser.fromJson(response, User.class);
+
+            try {
+                user = gsonParser.fromJson(responseJson.getString("user"), User.class);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("username", user.getUsername());
+            PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("name", user.getName());
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("email", user.getEmail());
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("tokenId", obj.getTokenId());
+            PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("last_login", user.getLast_login());
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putBoolean("isLogin", Boolean.TRUE);
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().apply();
             Toast.makeText(getBaseContext(), "Login successfully", Toast.LENGTH_LONG).show();

@@ -9,15 +9,15 @@ public class User {
     private String email;
     private String name;
 
-    public String getLastLogin() {
-        return lastLogin;
+    public String getLast_login() {
+        return last_login;
     }
 
-    public void setLastLogin(String lastLogin) {
-        this.lastLogin = lastLogin;
+    public void setLast_login(String last_login) {
+        this.last_login = last_login;
     }
 
-    private String lastLogin;
+    private String last_login;
 
     public String getUsername() {
         return username;

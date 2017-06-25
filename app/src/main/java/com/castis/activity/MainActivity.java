@@ -39,13 +39,8 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, HomeFragment.OnFragmentInteractionListener,
-        ReportFragment.OnFragmentInteractionListener, BeaconConsumer{
+        ReportFragment.OnFragmentInteractionListener {
     protected static final String TAG = "MainActivity";
-    private BeaconManager beaconManager;
-    private Region region;
-
-
-
 
 
     @Override
@@ -112,17 +107,6 @@ public class MainActivity extends AppCompatActivity
             ". How are you today?");*/
 
 
-
-        // beacon
-        beaconManager = BeaconManager.getInstanceForApplication(this);
-        // To detect proprietary beacons, you must add a line like below corresponding to your beacon
-        // type.  Do a web search for "setBeaconLayout" to get the proper expression.
-        // beaconManager.getBeaconParsers().add(new BeaconParser().
-        //        setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-        beaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
-        beaconManager.bind(this);
-
     }
 
     @Override
@@ -168,6 +152,13 @@ public class MainActivity extends AppCompatActivity
             fragmentClass = HomeFragment.class;
         } else if (id == R.id.nav_report) {
             fragmentClass = ReportFragment.class;
+        } else if (id == R.id.nav_logout) {
+
+            PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().clear();
+            PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().commit();
+            Intent i = new Intent(MainActivity.this, FlashActivity.class);
+            startActivity(i);
+            return true;
         } else {
             fragmentClass = HomeFragment.class;
         }
@@ -192,27 +183,5 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        beaconManager.unbind(this);
-    }
-
-    @Override
-    public void onBeaconServiceConnect() {
-            beaconManager.addRangeNotifier(new RangeNotifier() {
-            @Override
-            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                if (beacons.size() > 0) {
-
-                    Log.i(TAG, String.valueOf(beacons.iterator().next().getBluetoothName()));
-                    Log.i(TAG, beacons.iterator().next().getDistance() + " meters away.");
-
-                } else {
-                    Log.i(TAG, "Beacon not found");
-                }
-            }
-        });
-
-        try {
-            beaconManager.startRangingBeaconsInRegion(new Region("ranged region", Identifier.fromUuid(UUID.fromString("FDA50693-A4E2-4FB1-AFCF-C6EB07647825")), null, null));
-        } catch (RemoteException e) {    }
     }
 }
