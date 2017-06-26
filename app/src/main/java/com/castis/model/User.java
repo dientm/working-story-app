@@ -17,7 +17,7 @@ public class User {
         this.last_login = last_login;
     }
 
-    private String last_login;
+    private String  last_login;
 
     public String getUsername() {
         return username;

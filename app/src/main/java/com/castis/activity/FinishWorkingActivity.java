@@ -1,9 +1,9 @@
 package com.castis.activity;
 
 import android.content.Intent;
-import android.os.RemoteException;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.os.RemoteException;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -13,23 +13,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.castis.model.ResponseObject;
-import com.castis.model.User;
 import com.castis.service.BeaconService;
 import com.castis.service.HttpRequest;
 import com.castis.service.LocalBeacon;
-import com.castis.service.LocationService;
 import com.castis.service.RequestService;
+import com.castis.utils.Constants;
 import com.castis.utils.PreferenceUtils;
 import com.google.gson.Gson;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
-import org.altbeacon.beacon.Identifier;
+import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,13 +38,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
-public class FinishWorkingActivity extends ActionBarActivity implements BeaconConsumer, RequestService.AsyncResponse {
+public class FinishWorkingActivity extends AppCompatActivity implements BeaconConsumer, RequestService.AsyncResponse {
     LocalBeacon localBeacon = new LocalBeacon();
     String TAG = "FinishWorkingActivity";
     TextView location;
     Button submit;
     EditText report;
-    int i = 0;
+    BeaconManager beaconManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +53,10 @@ public class FinishWorkingActivity extends ActionBarActivity implements BeaconCo
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         toolbar.setTitle("Finish working");
-
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BeaconService.getInstance(FinishWorkingActivity.this.getApplicationContext()).getBeaconManager().unbind(FinishWorkingActivity.this);
+//                beaconManager.unbind(FinishWorkingActivity.this);
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             }
         });
@@ -104,8 +102,12 @@ public class FinishWorkingActivity extends ActionBarActivity implements BeaconCo
 //        LocationService locationService = LocationService.getInstance();
 //        localBeacon = locationService.getLocalBeacon(BeaconService.getInstance(this.getApplicationContext(), this));
         location = (TextView) findViewById(R.id.location);
-        BeaconService.getInstance(this.getApplicationContext()).bindService(this);
 
+        /*BeaconService.getInstance(this.getApplicationContext()).bindService(this);*/
+        beaconManager = BeaconManager.getInstanceForApplication(this);
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+        beaconManager.bind(this);
         Thread t2 = new Thread() {
 
             @Override
@@ -150,7 +152,7 @@ public class FinishWorkingActivity extends ActionBarActivity implements BeaconCo
         String strReport = report.getText().toString();
         URL url = null;
         try {
-            url = new URL("http://192.168.0.108:8000/worklog/finishworking");
+            url = new URL(Constants.WORKING_ACTION_URL);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -160,6 +162,7 @@ public class FinishWorkingActivity extends ActionBarActivity implements BeaconCo
             jsonBody.put("username", username);
             jsonBody.put("location", location);
             jsonBody.put("report", strReport);
+            jsonBody.put("action", Constants.FINISH_WORKING);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -173,54 +176,50 @@ public class FinishWorkingActivity extends ActionBarActivity implements BeaconCo
     }
 
     UUID preferUUID = null;
-
+    int i = 0;
     @Override
     public void onBeaconServiceConnect() {
+        final Region region = new Region("CASTIS", null, null, null);
 
-        BeaconService.getInstance(this.getApplicationContext()).getBeaconManager().addRangeNotifier(new RangeNotifier() {
+       beaconManager.addRangeNotifier(new RangeNotifier() {
             @Override
             public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-
                 if (beacons.size() > 0) {
-                    preferUUID = beacons.iterator().next().getId1().toUuid();
-                    if (BeaconService.getInstance(FinishWorkingActivity.this.getApplicationContext()).getAvailableBeaconUUIDs().contains(preferUUID)) {
-                        localBeacon = new LocalBeacon(String.valueOf(beacons.iterator().next().getBluetoothName()), "Dien HOme", beacons.iterator().next().getDistance());
+                    if (BeaconService.getInstance(FinishWorkingActivity.this.getApplicationContext())
+                            .getAvailableBeaconUUIDs().contains(beacons.iterator().next().getId1().toUuid())){
+                        preferUUID = beacons.iterator().next().getId1().toUuid();
+                        localBeacon = new LocalBeacon(preferUUID,
+                                String.valueOf(beacons.iterator().next().getBluetoothName())
+                                , BeaconService.getInstance(FinishWorkingActivity.this.getApplicationContext()).getLocalBeaconByUUID(preferUUID).getLocation()
+                                , beacons.iterator().next().getDistance());
                         Log.i(TAG, String.valueOf(beacons.iterator().next().getBluetoothName()));
                         Log.i(TAG, beacons.iterator().next().getDistance() + " meters away.");
                         i = 0;
+                    } else {
+                        i++;Log.i(TAG, "i = " + i);
+                        if (i > 200) {
+                            i = 0;
+                        }
+                        Log.i(TAG, "Beacon not found");
                     }
-                } else {
-                    i++;
-                    Log.i(TAG, "i = " + i);
-                    if (i > 200) {
-                        i = 0;
-                    }
-                    Log.i(TAG, "Beacon not found");
                 }
             }
         });
 
-        try {
-            if (null == preferUUID) {
-                BeaconService.getInstance(this.getApplicationContext()).getBeaconManager()
-                        .startRangingBeaconsInRegion(new Region("ranged region", null, null, null));
 
-            } else {
-                Log.i(TAG, "Using prefer UUID " + preferUUID);
-                BeaconService.getInstance(this.getApplicationContext()).getBeaconManager()
-                        .startRangingBeaconsInRegion(new Region("ranged region", Identifier.fromUuid(preferUUID), null, null));
-            }
-            /*BeaconService.getInstance(this.getApplicationContext()).getBeaconManager()
-                    .startRangingBeaconsInRegion(new Region("ranged region", Identifier.fromUuid(UUID.fromString("FDA50693-A4E2-4FB1-AFCF-C6EB07647825")), null, null));*/
+       try {
+            beaconManager.stopRangingBeaconsInRegion(region);
+            beaconManager.startRangingBeaconsInRegion(region);
         } catch (RemoteException e) {
+            Log.e(TAG, e.toString());
         }
 
     }
 
     @Override
     protected void onDestroy() {
-        BeaconService.getInstance(this.getApplicationContext()).getBeaconManager().unbind(this);
         super.onDestroy();
+        beaconManager.unbind(this);
     }
 
     @Override
@@ -238,13 +237,15 @@ public class FinishWorkingActivity extends ActionBarActivity implements BeaconCo
             Log.e(TAG, e.toString());
         }
         if (obj.getStatusCode() == 200) {
+            BeaconService.getInstance(this.getApplicationContext()).getBeaconManager().stopMonitoringBeaconsInRegion(new Region("ranged region", null, null, null));
             BeaconService.getInstance(this.getApplicationContext()).getBeaconManager().unbind(this);
             Toast.makeText(getBaseContext(), "Done", Toast.LENGTH_LONG).show();
             Intent i = new Intent(FinishWorkingActivity.this, FlashActivity.class);
-
             startActivity(i);
         } else {
 
         }
     }
+
+
 }

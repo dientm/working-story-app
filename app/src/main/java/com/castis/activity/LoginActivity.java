@@ -35,6 +35,7 @@ import com.castis.model.ResponseObject;
 import com.castis.model.User;
 import com.castis.service.RequestService;
 import com.castis.service.HttpRequest;
+import com.castis.utils.Constants;
 import com.castis.utils.PreferenceUtils;
 import com.google.gson.Gson;
 
@@ -71,7 +72,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-
+    private TextView register_link;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +106,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        // register link
+        register_link = (TextView) findViewById(R.id.register_link);
+        register_link.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(i);
+            }
+        });
     }
 
     private void populateAutoComplete() {
@@ -163,14 +174,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // do login
             URL url = null;
             try {
-                url = new URL("http://192.168.0.108:8000/account/login");
+                url = new URL(Constants.LOGIN_URL);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
             JSONObject jsonBody = new JSONObject();
 
             try {
-                jsonBody.put("username", "admin");
+                jsonBody.put("email", email);
                 jsonBody.put("password", password);
             } catch (JSONException e) {
                 e.printStackTrace();

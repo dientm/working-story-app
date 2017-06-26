@@ -90,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:textColor="#fefefe"
-                android:text="No account yet? Create one" />
+                android:text="No account? Create one" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

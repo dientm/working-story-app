@@ -22,11 +22,10 @@ public class BeaconService {
     private static String TAG = "BeaconService";
     private static BeaconService instance;
 
-    private static BeaconManager beaconManager;
+    private BeaconManager beaconManager;
     private Region region;
     private UUID[] uuid;
 
-    private static Context ctx;
     static LocalBeacon localBeacon;
     private AvailableBeacons availableBeacons;
     private List<UUID> availableBeaconUUIDs;
@@ -41,9 +40,14 @@ public class BeaconService {
     }
 
     public void bindService(BeaconConsumer consumer) {
+        beaconManager.unbind(consumer);
         beaconManager.bind(consumer);
     }
 
+    public void unbindService(BeaconConsumer consumer) {
+        beaconManager.unbind(consumer);
+
+    }
     public static BeaconService getInstance(Context context) {
         // beacon
         if (instance == null) {
@@ -79,4 +83,15 @@ public class BeaconService {
     public void setAvailableBeaconUUIDs(List<UUID> availableBeaconUUIDs) {
         this.availableBeaconUUIDs = availableBeaconUUIDs;
     }
+
+    public LocalBeacon getLocalBeaconByUUID(UUID uuid) {
+        LocalBeacon localBeacon = null;
+        for (Beacon beacon : availableBeacons.getBeacons()) {
+            if (beacon.getUuid().equals(uuid)) {
+                localBeacon =  new LocalBeacon(uuid, beacon.getName(), beacon.getLocation(),0.0);
+            }
+        }
+        return localBeacon;
+    }
+
 }

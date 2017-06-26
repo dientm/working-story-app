@@ -1,5 +1,7 @@
 package com.castis.service;
 
+import java.util.UUID;
+
 /**
  * Created by trand on 6/25/2017.
  */
@@ -7,6 +9,8 @@ package com.castis.service;
 public class LocalBeacon {
     double distance;
     String location;
+    String name;
+    UUID uuid;
 
     public double getDistance() {
         return distance;
@@ -32,14 +36,23 @@ public class LocalBeacon {
         this.name = name;
     }
 
-    String name;
+
     public LocalBeacon() {
         this.location = "Loading...";
     }
 
-    public LocalBeacon(String name, String location, double distance) {
+    public LocalBeacon(UUID uuid, String name, String location, double distance) {
+        this.uuid = uuid;
         this.name = name;
         this.location = location;
         this.distance = distance;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 }

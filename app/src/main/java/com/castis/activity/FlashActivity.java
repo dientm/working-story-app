@@ -11,6 +11,7 @@ import com.castis.model.AvailableBeacons;
 import com.castis.service.BeaconService;
 import com.castis.service.HttpRequest;
 import com.castis.service.RequestService;
+import com.castis.utils.Constants;
 import com.castis.utils.PreferenceUtils;
 import com.google.gson.Gson;
 
@@ -45,7 +46,7 @@ public class FlashActivity extends AppCompatActivity implements RequestService.A
         }
         URL url = null;
         try {
-            url = new URL("http://192.168.0.108:8000/worklog/get_beacon_configuration");
+            url = new URL(Constants.BEACON_CONFIG_URL);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -62,9 +63,9 @@ public class FlashActivity extends AppCompatActivity implements RequestService.A
         if (!mBluetoothAdapter.isEnabled()) {
             mBluetoothAdapter.enable();
 
-        } else {
+        }/* else {
             Toast.makeText(getApplicationContext(), "Bluetooth Al-Ready Enable", Toast.LENGTH_LONG).show();
-        }
+        }*/
 
     }
 
