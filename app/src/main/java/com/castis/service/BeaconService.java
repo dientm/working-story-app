@@ -22,32 +22,20 @@ public class BeaconService {
     private static String TAG = "BeaconService";
     private static BeaconService instance;
 
-    private BeaconManager beaconManager;
-    private Region region;
-    private UUID[] uuid;
 
     static LocalBeacon localBeacon;
     private AvailableBeacons availableBeacons;
     private List<UUID> availableBeaconUUIDs;
 
     public BeaconService(Context context) {
-
-        uuid = new UUID[]{UUID.fromString("FDA50693-A4E2-4FB1-AFCF-C6EB07647825")};
+        availableBeacons = new AvailableBeacons();
+        /*uuid = new UUID[]{UUID.fromString("FDA50693-A4E2-4FB1-AFCF-C6EB07647825")};
 
         beaconManager = BeaconManager.getInstanceForApplication(context);
         beaconManager.getBeaconParsers().add(new BeaconParser().
-                setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+                setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));*/
     }
 
-    public void bindService(BeaconConsumer consumer) {
-        beaconManager.unbind(consumer);
-        beaconManager.bind(consumer);
-    }
-
-    public void unbindService(BeaconConsumer consumer) {
-        beaconManager.unbind(consumer);
-
-    }
     public static BeaconService getInstance(Context context) {
         // beacon
         if (instance == null) {
@@ -60,9 +48,6 @@ public class BeaconService {
         return localBeacon;
     }
 
-    public BeaconManager getBeaconManager() {
-        return beaconManager;
-    }
 
     public AvailableBeacons getAvailableBeacons() {
         return availableBeacons;

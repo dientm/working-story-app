@@ -1,8 +1,12 @@
 package com.castis.activity;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -14,33 +18,46 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.castis.fragment.HomeFragment;
 import com.castis.fragment.ReportFragment;
+import com.castis.model.ResponseObject;
+import com.castis.service.BeaconService;
+import com.castis.service.HttpRequest;
+import com.castis.service.LocalBeacon;
+import com.castis.service.RequestService;
+import com.castis.utils.Constants;
 import com.castis.utils.PreferenceUtils;
+import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.gson.Gson;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.Identifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
-import org.w3c.dom.Text;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, HomeFragment.OnFragmentInteractionListener,
-        ReportFragment.OnFragmentInteractionListener {
+        ReportFragment.OnFragmentInteractionListener, BeaconConsumer {
     protected static final String TAG = "MainActivity";
+    BeaconManager beaconManager  ;
 
 
     @Override
@@ -49,6 +66,12 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        beaconManager = BeaconManager.getInstanceForApplication(this);
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
+        beaconManager.bind(this);
+
 
         if (savedInstanceState == null) {
             Fragment fragment = null;
@@ -74,6 +97,15 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // event click button start working
+        FloatingActionButton button_start_working = (FloatingActionButton) findViewById(R.id.button_start_working);
+        button_start_working.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                performStartWorking();
+            }
+        });
+
        // event click button finish working
         com.github.clans.fab.FloatingActionButton fab_finish_working = (com.github.clans.fab.FloatingActionButton) findViewById(R.id.button_finish_working);
         fab_finish_working.setOnClickListener(new View.OnClickListener() {
@@ -96,9 +128,9 @@ public class MainActivity extends AppCompatActivity
 
         // display nav_header
         TextView name_view = (TextView) findViewById(R.id.name);
-        name_view.setText("MARK");
+        name_view.setText(PreferenceUtils.getInstance(this).getSharedPref().getString("name","Castis User"));
         TextView email_view = (TextView) findViewById(R.id.email);
-        email_view.setText("mark@castis.com");
+        email_view.setText(PreferenceUtils.getInstance(this).getSharedPref().getString("email", ""));
 
         // R.id.textview_home_great
         TextView home_great = (TextView) findViewById(R.id.textview_home_great);
@@ -108,6 +140,133 @@ public class MainActivity extends AppCompatActivity
 
 
     }
+
+
+    boolean isLocated = false;
+    private void performStartWorking() {
+
+
+        Thread t2 = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+
+                        if (!"".equalsIgnoreCase(PreferenceUtils.getInstance(MainActivity.this.getApplicationContext()).getSharedPref().getString("location",""))) {
+                            // do post
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    new StartWorking().doStart(PreferenceUtils.getInstance(MainActivity.this).getSharedPref().getString("location", "").toString(), "");
+                                }
+                            });
+
+                            Thread.currentThread().interrupt();
+                            return;
+                        } else {
+                            Thread.sleep(500);
+                            if (count > 10) {
+                                isLocated = false;
+                                showPopUp();
+                                Thread.currentThread().interrupt();
+                                return;
+                            }
+                        }
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+            void showPopUp() {
+                LayoutInflater li = LayoutInflater.from(MainActivity.this.getApplicationContext());
+                View promptsView = li.inflate(R.layout.prompts, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        MainActivity.this.getApplicationContext());
+
+                // set prompts.xml to alertdialog builder
+                alertDialogBuilder.setView(promptsView);
+
+                final EditText userInput = (EditText) promptsView
+                        .findViewById(R.id.note);
+
+                // set dialog message
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        // do post
+                                        new StartWorking().doStart(userInput.getText().toString(), "AAA");
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                // create alert dialog
+                alertDialog = alertDialogBuilder.create();
+
+                // show it
+                alertDialog.show();
+            }
+        };
+        t2.start();
+
+    }
+    AlertDialog alertDialog;
+    private class StartWorking implements RequestService.AsyncResponse{
+
+        public void doStart(String location, String report) {
+            URL url = null;
+            try {
+                url = new URL(Constants.WORKING_ACTION_URL);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            JSONObject jsonBody = new JSONObject();
+
+            try {
+                jsonBody.put("username", PreferenceUtils.getInstance(MainActivity.this).getSharedPref().getString("username",""));
+
+                jsonBody.put("location", location);
+                jsonBody.put("report", report);
+                jsonBody.put("action", Constants.START_WORKING);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            HttpRequest request = new HttpRequest();
+            request.setUrl(url);
+            request.setMethod("POST");
+            request.setPayLoad(jsonBody);
+            new RequestService(this).execute(request);
+        }
+        @Override
+        public void ServerResponse(String response) throws Exception {
+            Log.i(TAG, response);
+            ResponseObject obj = new ResponseObject();
+            Gson gsonParser = new Gson();
+            JSONObject responseJson = null;
+            try {
+                responseJson = new JSONObject(response);
+                obj = gsonParser.fromJson(response, ResponseObject.class);
+                Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_LONG).show();
+
+            } catch (Exception e) {
+                Log.e(TAG, "response not json format");
+                Log.e(TAG, e.toString());
+            }
+
+        }
+    }
+
+
+
 
     @Override
     public void onBackPressed() {
@@ -180,8 +339,74 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        beaconManager.unbind(this);
+    }
+
+    @Override
+    public void onPause()  {
+        super.onPause();
+        if (beaconManager.isBound(this)) {
+            beaconManager.setBackgroundMode(false);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (beaconManager.isBound(this)) {
+            beaconManager.setBackgroundMode(false);
+        }
+    }
+    LocalBeacon localBeacon = new LocalBeacon();
+    UUID preferUUID = null;
+    int count = 0;
+    final Region region = new Region("CASTIS", null, null, null);
+    @Override
+    public void onBeaconServiceConnect() {
+
+
+        beaconManager.addRangeNotifier(new RangeNotifier() {
+            @Override
+            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+                if (beacons.size() > 0) {
+                    if (BeaconService.getInstance(MainActivity.this.getApplicationContext())
+                            .getAvailableBeaconUUIDs().contains(beacons.iterator().next().getId1().toUuid())) {
+                        preferUUID = beacons.iterator().next().getId1().toUuid();
+                        localBeacon = new LocalBeacon(preferUUID,
+                                String.valueOf(beacons.iterator().next().getBluetoothName())
+                                , BeaconService.getInstance(MainActivity.this.getApplicationContext()).getLocalBeaconByUUID(preferUUID).getLocation()
+                                , beacons.iterator().next().getDistance());
+                        Log.i(TAG, String.valueOf(beacons.iterator().next().getBluetoothName()));
+                        Log.i(TAG, beacons.iterator().next().getDistance() + " meters away.");
+                        count = 0;
+                        PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().putString("location", localBeacon.getLocation());
+                        PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().commit();
+                    }
+                } else {
+                    count++;
+                    Log.i(TAG, "i = " + count);
+                    if (count > 10) {
+                        PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().putString("location", "");
+                        PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().commit();
+                    }
+                    if (count > 20) {
+                        count = 0;
+                    }
+                    Log.i(TAG, "Beacon not found");
+                }
+            }
+        });
+
+
+        try {
+            beaconManager.stopRangingBeaconsInRegion(region);
+            beaconManager.startRangingBeaconsInRegion(region);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.toString());
+        }
     }
 }
