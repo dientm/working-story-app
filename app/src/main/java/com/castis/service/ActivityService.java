@@ -44,7 +44,7 @@ public class ActivityService implements AsyncResponse {
     @Override
     public void ServerResponse(String response) throws Exception {
         Log.i(TAG, response);
-        Gson gsonParser = new Gson();
+        Gson gsonParser123 = new Gson();
 
         ActivityDto[] activities;
         try {
