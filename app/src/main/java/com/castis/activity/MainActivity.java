@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.castis.fragment.HomeFragment;
 import com.castis.fragment.ReportFragment;
 import com.castis.model.ResponseObject;
+import com.castis.service.ActivityService;
 import com.castis.service.BeaconService;
 import com.castis.service.HttpRequest;
 import com.castis.service.LocalBeacon;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity
     protected static final String TAG = "MainActivity";
     BeaconManager beaconManager  ;
 
-
+    TextView message;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +73,9 @@ public class MainActivity extends AppCompatActivity
                 setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
         beaconManager.bind(this);
 
+
+        // start get activity
+        loadActivity();
 
         if (savedInstanceState == null) {
             Fragment fragment = null;
@@ -133,12 +137,32 @@ public class MainActivity extends AppCompatActivity
         email_view.setText(PreferenceUtils.getInstance(this).getSharedPref().getString("email", ""));
 
         // R.id.textview_home_great
-        TextView home_great = (TextView) findViewById(R.id.textview_home_great);
+        message = (TextView) findViewById(R.id.textview_home_great);
         /*String greatMessage = "Hello
         home_great.setText("Hello " + PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPref().getString("name", "") +
             ". How are you today?");*/
 
 
+    }
+
+    private void loadActivity() {
+
+        Thread t2 = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+
+                        new ActivityService().reload();
+
+                    Thread.sleep(5000);
+
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+
+        t2.start();
     }
 
 
@@ -255,6 +279,8 @@ public class MainActivity extends AppCompatActivity
             try {
                 responseJson = new JSONObject(response);
                 obj = gsonParser.fromJson(response, ResponseObject.class);
+                message = (TextView) findViewById(R.id.textview_home_great);
+                message.setText(obj.getMessage().toString());
                 Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_LONG).show();
 
             } catch (Exception e) {
@@ -276,6 +302,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+
     }
 
     @Override
@@ -380,15 +407,15 @@ public class MainActivity extends AppCompatActivity
                                 String.valueOf(beacons.iterator().next().getBluetoothName())
                                 , BeaconService.getInstance(MainActivity.this.getApplicationContext()).getLocalBeaconByUUID(preferUUID).getLocation()
                                 , beacons.iterator().next().getDistance());
-                        Log.i(TAG, String.valueOf(beacons.iterator().next().getBluetoothName()));
-                        Log.i(TAG, beacons.iterator().next().getDistance() + " meters away.");
+//                        Log.i(TAG, String.valueOf(beacons.iterator().next().getBluetoothName()));
+//                        Log.i(TAG, beacons.iterator().next().getDistance() + " meters away.");
                         count = 0;
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().putString("location", localBeacon.getLocation());
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().commit();
                     }
                 } else {
                     count++;
-                    Log.i(TAG, "i = " + count);
+//                    Log.i(TAG, "i = " + count);
                     if (count > 10) {
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().putString("location", "");
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().commit();
@@ -396,7 +423,7 @@ public class MainActivity extends AppCompatActivity
                     if (count > 20) {
                         count = 0;
                     }
-                    Log.i(TAG, "Beacon not found");
+//                    Log.i(TAG, "Beacon not found");
                 }
             }
         });
