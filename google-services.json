@@ -15,14 +15,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "40821817260-bookpudoheq4p55b4cduqtcb90hpdo8f.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.castis.activity",
-            "certificate_hash": "b64adc08a6af54e8763cbdd0d97b006908375aad"
-          }
-        },
-        {
           "client_id": "40821817260-n80lqa25mvm66bcupjjfjn73mqcr4j7r.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "40821817260-n80lqa25mvm66bcupjjfjn73mqcr4j7r.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

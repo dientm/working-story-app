@@ -1,5 +1,6 @@
 package com.castis.activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -103,7 +104,7 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
                             @Override
                             public void run() {
                                 TextView location = (TextView) findViewById(R.id.location);
-                                location.setText(PreferenceUtils.getInstance(FinishWorkingActivity.this).getSharedPref().getString("location","N/A"));
+                                location.setText(PreferenceUtils.getInstance(FinishWorkingActivity.this).getSharedPref().getString("location", "N/A"));
                             }
                         });
                     }
@@ -128,6 +129,7 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
     }
 
     private void submitFinishWorking() {
+        showDialog();
         boolean cancel = false;
 
         String username = PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPref().getString("username", "");
@@ -159,9 +161,6 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
     }
 
 
-
-
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -182,13 +181,34 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
             Log.e(TAG, e.toString());
         }
         if (obj.getStatusCode() == 200) {
+            Thread.sleep(1000);
+            hideDialog();
             Toast.makeText(getBaseContext(), "Done", Toast.LENGTH_LONG).show();
-            Intent i = new Intent(FinishWorkingActivity.this, FlashActivity.class);
+            Intent i = new Intent(FinishWorkingActivity.this, MainActivity.class);
+            i.putExtra ("message", obj.getMessage());
             startActivity(i);
         } else {
 
         }
     }
 
+    AlertDialog malertDialog;
+
+    public void showDialog() {
+        malertDialog = new AlertDialog.Builder(FinishWorkingActivity.this).create();
+        malertDialog.setTitle("Finsh working");
+        malertDialog.setMessage("Please wait...");
+        /*alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });*/
+        malertDialog.show();
+    }
+
+    public void hideDialog() {
+        malertDialog.dismiss();
+    }
 
 }

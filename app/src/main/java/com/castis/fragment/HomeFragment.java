@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.castis.activity.R;
 
@@ -30,9 +31,20 @@ public class HomeFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    public TextView getMessage_textview() {
+        return message_textview;
+    }
+
+    public void setMessage_textview(TextView message_textview) {
+        this.message_textview = message_textview;
+    }
+
+    TextView message_textview;
+
     public HomeFragment() {
         // Required empty public constructor
     }
+
 
     /**
      * Use this factory method to create a new instance of
@@ -62,10 +74,20 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        message_textview =(TextView) getView().findViewById(R.id.textview_home_great);
+        String initMessage =  getActivity().getIntent().getStringExtra("message");
+        message_textview.setText(initMessage);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.fragment_home, container, false);
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

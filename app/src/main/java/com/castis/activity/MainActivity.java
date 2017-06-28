@@ -1,12 +1,11 @@
 package com.castis.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -23,6 +22,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,7 @@ import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -61,6 +63,8 @@ public class MainActivity extends AppCompatActivity
     BeaconManager beaconManager  ;
 
     TextView message;
+
+    ListView  timeline_activity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,12 +72,21 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        String initMessage =  getIntent().getStringExtra("message");
+        // R.id.textview_home_great
+/*        HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_home);
+        message = (TextView) homeFragment.getView().findViewById(R.id.textview_home_great);
+
+
+        if (initMessage != null) {
+            message.setText(initMessage);
+        }*/
         beaconManager = BeaconManager.getInstanceForApplication(this);
         beaconManager.getBeaconParsers().add(new BeaconParser().
                 setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24"));
         beaconManager.bind(this);
 
-
+        timeline_activity = (ListView) findViewById(R.id.timeline_activity);
         // start get activity
         loadActivity();
 
@@ -115,7 +128,7 @@ public class MainActivity extends AppCompatActivity
         fab_finish_working.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(MainActivity.this, FinishWorkingActivity.class);
+               Intent i = new Intent(MainActivity.this, FinishWorkingActivity.class);
                 startActivity(i);
             }
         });
@@ -136,11 +149,7 @@ public class MainActivity extends AppCompatActivity
         TextView email_view = (TextView) findViewById(R.id.email);
         email_view.setText(PreferenceUtils.getInstance(this).getSharedPref().getString("email", ""));
 
-        // R.id.textview_home_great
-        message = (TextView) findViewById(R.id.textview_home_great);
-        /*String greatMessage = "Hello
-        home_great.setText("Hello " + PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPref().getString("name", "") +
-            ". How are you today?");*/
+
 
 
     }
@@ -152,10 +161,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void run() {
                 try {
+                        while(!isInterrupted()) {
+                            timeline_activity = (ListView) findViewById(R.id.timeline_activity);
+                            new ActivityService(MainActivity.this, timeline_activity);
+                            Thread.sleep(1000);
+                        }
 
-                        new ActivityService().reload();
-
-                    Thread.sleep(5000);
 
                 } catch (InterruptedException e) {
                 }
@@ -168,13 +179,14 @@ public class MainActivity extends AppCompatActivity
 
     boolean isLocated = false;
     private void performStartWorking() {
-
+        showDialog();
 
         Thread t2 = new Thread() {
 
             @Override
             public void run() {
                 try {
+
                     while (!isInterrupted()) {
 
                         if (!"".equalsIgnoreCase(PreferenceUtils.getInstance(MainActivity.this.getApplicationContext()).getSharedPref().getString("location",""))) {
@@ -192,13 +204,18 @@ public class MainActivity extends AppCompatActivity
                             Thread.sleep(500);
                             if (count > 10) {
                                 isLocated = false;
-                                showPopUp();
-                                Thread.currentThread().interrupt();
-                                return;
+                                break;
+//                                Thread.currentThread().interrupt();
+
+
                             }
                         }
                     }
                 } catch (InterruptedException e) {
+                }
+                if (!isLocated) {
+                    hideDialog();
+                    showPopUp();
                 }
             }
             void showPopUp() {
@@ -281,8 +298,9 @@ public class MainActivity extends AppCompatActivity
                 obj = gsonParser.fromJson(response, ResponseObject.class);
                 message = (TextView) findViewById(R.id.textview_home_great);
                 message.setText(obj.getMessage().toString());
+                Thread.sleep(1000);
                 Toast.makeText(getBaseContext(), "Success", Toast.LENGTH_LONG).show();
-
+                hideDialog();
             } catch (Exception e) {
                 Log.e(TAG, "response not json format");
                 Log.e(TAG, e.toString());
@@ -381,6 +399,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
+    AlertDialog malertDialog;
+    public void showDialog() {
+        malertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        malertDialog.setTitle("Start working");
+        malertDialog.setMessage("Please wait...");
+        /*alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });*/
+        malertDialog.show();
+    }
+    public void hideDialog() {
+        malertDialog.dismiss();
+    }
     @Override
     public void onResume() {
         super.onResume();
@@ -407,15 +442,15 @@ public class MainActivity extends AppCompatActivity
                                 String.valueOf(beacons.iterator().next().getBluetoothName())
                                 , BeaconService.getInstance(MainActivity.this.getApplicationContext()).getLocalBeaconByUUID(preferUUID).getLocation()
                                 , beacons.iterator().next().getDistance());
-//                        Log.i(TAG, String.valueOf(beacons.iterator().next().getBluetoothName()));
-//                        Log.i(TAG, beacons.iterator().next().getDistance() + " meters away.");
+                        Log.i(TAG, String.valueOf(beacons.iterator().next().getBluetoothName()));
+                        Log.i(TAG, beacons.iterator().next().getDistance() + " meters away.");
                         count = 0;
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().putString("location", localBeacon.getLocation());
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().commit();
                     }
                 } else {
                     count++;
-//                    Log.i(TAG, "i = " + count);
+                    Log.i(TAG, "i = " + count);
                     if (count > 10) {
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().putString("location", "");
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().commit();
@@ -423,7 +458,7 @@ public class MainActivity extends AppCompatActivity
                     if (count > 20) {
                         count = 0;
                     }
-//                    Log.i(TAG, "Beacon not found");
+                    Log.i(TAG, "Beacon not found");
                 }
             }
         });
