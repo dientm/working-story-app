@@ -82,7 +82,7 @@ public class ActivityService implements AsyncResponse {
                 }
                 final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>
                         (ctx, android.R.layout.simple_list_item_1, activityList);
-                view.text(TypedValue.COMPLEX_UNIT_DIP,25);
+//                view.text(TypedValue.COMPLEX_UNIT_DIP,25);
                 /*view.setBackground(ctx.getResources().getDrawable(R.drawable.custom_background_orange1));*/
 
                 view.setAdapter(arrayAdapter);

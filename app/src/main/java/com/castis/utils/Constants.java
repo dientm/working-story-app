@@ -5,7 +5,7 @@ package com.castis.utils;
  */
 
 public class Constants {
-    public static String SERVER = "http://192.168.1.71:8000";
+    public static String SERVER = "http://192.168.0.108:8000";
     public static String LOGIN_URL = SERVER + "/account/login";
     public static String REGISTER_URL = SERVER + "/account/register";
     public static String WORKING_ACTION_URL = SERVER + "/worklog/working-action";

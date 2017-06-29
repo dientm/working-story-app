@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity
     BeaconManager beaconManager  ;
 
     TextView message;
-
+    AlertDialog alertDialog;
     ListView  timeline_activity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +119,11 @@ public class MainActivity extends AppCompatActivity
         button_start_working.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showDialog();
                 performStartWorking();
+
+
+
             }
         });
 
@@ -179,86 +183,86 @@ public class MainActivity extends AppCompatActivity
 
     boolean isLocated = false;
     private void performStartWorking() {
-        showDialog();
-
-        Thread t2 = new Thread() {
-
-            @Override
-            public void run() {
-                try {
-
-                    while (!isInterrupted()) {
-
-                        if (!"".equalsIgnoreCase(PreferenceUtils.getInstance(MainActivity.this.getApplicationContext()).getSharedPref().getString("location",""))) {
-                            // do post
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    new StartWorking().doStart(PreferenceUtils.getInstance(MainActivity.this).getSharedPref().getString("location", "").toString(), "");
-                                }
-                            });
-
-                            Thread.currentThread().interrupt();
-                            return;
-                        } else {
-                            Thread.sleep(500);
-                            if (count > 10) {
-                                isLocated = false;
-                                break;
-//                                Thread.currentThread().interrupt();
 
 
-                            }
-                        }
+        int i = 0;
+        while(!isLocated) {
+
+            i++;
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (!"".equalsIgnoreCase(PreferenceUtils.getInstance(MainActivity.this.getApplicationContext()).getSharedPref().getString("location",""))) {
+                // do post
+                isLocated = true;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new StartWorking().doStart(PreferenceUtils.getInstance(MainActivity.this).getSharedPref().getString("location", "").toString(), "");
                     }
-                } catch (InterruptedException e) {
-                }
-                if (!isLocated) {
-                    hideDialog();
+                });
+
+
+            }
+            if (i > 20 && !isLocated || isLocated) break;
+        }
+        if (!isLocated) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+//                    hideDialog();
                     showPopUp();
                 }
-            }
-            void showPopUp() {
-                LayoutInflater li = LayoutInflater.from(MainActivity.this.getApplicationContext());
-                View promptsView = li.inflate(R.layout.prompts, null);
+            });
+        }
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                        MainActivity.this.getApplicationContext());
 
-                // set prompts.xml to alertdialog builder
-                alertDialogBuilder.setView(promptsView);
-
-                final EditText userInput = (EditText) promptsView
-                        .findViewById(R.id.note);
-
-                // set dialog message
-                alertDialogBuilder
-                        .setCancelable(false)
-                        .setPositiveButton("OK",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        // do post
-                                        new StartWorking().doStart(userInput.getText().toString(), "AAA");
-                                    }
-                                })
-                        .setNegativeButton("Cancel",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-
-                // create alert dialog
-                alertDialog = alertDialogBuilder.create();
-
-                // show it
-                alertDialog.show();
-            }
-        };
-        t2.start();
 
     }
-    AlertDialog alertDialog;
+    void showPopUp() {
+        LayoutInflater li = LayoutInflater.from(MainActivity.this);
+        View promptsView = li.inflate(R.layout.prompts, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                MainActivity.this);
+
+        // set prompts.xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final EditText userInput = (EditText) promptsView
+                .findViewById(R.id.note);
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                // do post
+                                new StartWorking().doStart(userInput.getText().toString(), "AAA");
+                            }
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+        // create alert dialog
+        alertDialog = alertDialogBuilder.create();
+
+        // show it
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                alertDialog.show();
+            }
+        });
+    }
+
     private class StartWorking implements RequestService.AsyncResponse{
 
         public void doStart(String location, String report) {
