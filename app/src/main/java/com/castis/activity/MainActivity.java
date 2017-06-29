@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity
 
 
             }
-            if (i > 20 && !isLocated || isLocated) break;
+            if (i > 20 && !isLocated || isLocated123) break;
         }
         if (!isLocated) {
             runOnUiThread(new Runnable() {
