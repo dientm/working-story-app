@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +19,7 @@ import com.castis.service.RequestService;
 import com.castis.utils.Constants;
 import com.castis.utils.PreferenceUtils;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +52,9 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
             }
         });
 
+        // avatar
+        ImageView avatar = (ImageView) findViewById(R.id.avatar);
+        Picasso.with(this).load(Constants.GET_AVATAR_URL + PreferenceUtils.getInstance(this).getSharedPref().getString("username", "")).resize(100,100).into(avatar);
         // set time counter
         TextView current_time_view = (TextView) findViewById(R.id.current_time);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

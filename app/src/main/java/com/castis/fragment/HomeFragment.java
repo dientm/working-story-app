@@ -78,7 +78,9 @@ public class HomeFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         message_textview =(TextView) getView().findViewById(R.id.textview_home_great);
         String initMessage =  getActivity().getIntent().getStringExtra("message");
-        message_textview.setText(initMessage);
+        if (null != initMessage) {
+            message_textview.setText(initMessage);
+        }
     }
 
     @Override

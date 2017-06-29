@@ -26,28 +26,35 @@
             <TextView
                 android:id="@+id/textview_home_great"
                 android:layout_width="match_parent"
-                android:paddingTop="5dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingBottom="5dp"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:text="Hello Mark. How are you today?"/>
+                android:paddingBottom="5dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp"
+                android:gravity="center"
+                android:text="How are you today?"
+                android:textColor="@color/bright_foreground_material_light"
+                android:textSize="18sp" />
 
 
         </LinearLayout>
 
         <ListView
             android:id="@+id/timeline_activity"
-            android:stackFromBottom="true"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:textSize="8dp"
-            android:background="@drawable/custom_background_light"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp"
+            android:layout_alignParentStart="true"
             android:layout_below="@+id/linearLayout"
-            android:layout_alignParentStart="true">
+            android:background="@drawable/custom_background_soft_green"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:stackFromBottom="false"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="2dp"
+            android:scrollbars = "vertical"
+            android:textSize="8sp">
 
         </ListView>
 
@@ -63,17 +70,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:background="@drawable/custom_background_light"
-            android:orientation="horizontal"
-            android:layout_marginTop="480dp"
-            android:layout_below="@+id/linearLayout"
-            android:layout_alignParentStart="true">
-
-
-        </LinearLayout>
     </RelativeLayout>
 </ScrollView>
 

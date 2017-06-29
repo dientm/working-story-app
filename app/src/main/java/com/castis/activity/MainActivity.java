@@ -2,6 +2,7 @@ package com.castis.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -40,6 +42,7 @@ import com.castis.utils.PreferenceUtils;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -152,15 +155,17 @@ public class MainActivity extends AppCompatActivity
         name_view.setText(PreferenceUtils.getInstance(this).getSharedPref().getString("name","Castis User"));
         TextView email_view = (TextView) findViewById(R.id.email);
         email_view.setText(PreferenceUtils.getInstance(this).getSharedPref().getString("email", ""));
-
+        ImageView avatar = (ImageView) findViewById(R.id.avatar);
+        Picasso.with(this).load(Constants.GET_AVATAR_URL + PreferenceUtils.getInstance(this).getSharedPref().getString("username","")).resize(150,150).into(avatar);
 
 
 
     }
 
+    Thread loadActivitythread;
     private void loadActivity() {
 
-        Thread t2 = new Thread() {
+        Thread loadActivitythread = new Thread() {
 
             @Override
             public void run() {
@@ -177,7 +182,7 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        t2.start();
+        loadActivitythread.start();
     }
 
 
@@ -206,7 +211,7 @@ public class MainActivity extends AppCompatActivity
 
 
             }
-            if (i > 20 && !isLocated || isLocated123) break;
+            if (i > 20 && !isLocated || isLocated) break;
         }
         if (!isLocated) {
             runOnUiThread(new Runnable() {
@@ -460,6 +465,16 @@ public class MainActivity extends AppCompatActivity
                         PreferenceUtils.getInstance(MainActivity.this).getSharedPrefEditor().commit();
                     }
                     if (count > 20) {
+                        try {
+                            Thread.currentThread().sleep(50);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                        if (!mBluetoothAdapter.isEnabled()) {
+                            mBluetoothAdapter.enable();
+
+                        }
                         count = 0;
                     }
                     Log.i(TAG, "Beacon not found");

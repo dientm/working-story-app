@@ -5,6 +5,8 @@ package com.castis.model;
  */
 
 public class ActivityDto {
+    private String username;
+
     private String name;
     private String action;
     private String action_on;
@@ -41,9 +43,19 @@ public class ActivityDto {
     public void setNote(String note) {
         this.note = note;
     }
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String toString() {
         String mess =  "" + this.name + " has " + this.action + " at " + this.action_on;
         return mess;
+    }
+    public String[] toStringArr() {
+        return new String[]{name, action, action_on, note};
     }
 }

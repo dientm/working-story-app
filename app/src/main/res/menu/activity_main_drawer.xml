@@ -15,10 +15,6 @@
             android:icon="@drawable/icon_report"
             android:title="Report" />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
             android:title="Tools" />
@@ -29,7 +25,7 @@
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="Report Bug" />
             <item
                 android:id="@+id/nav_logout"
                 android:icon="@drawable/logout_variant"

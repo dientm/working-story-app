@@ -59,7 +59,7 @@
             android:layout_marginLeft="10dp"
             fab:menu_fab_size="normal"
             fab:menu_showShadow="true"
-            fab:menu_shadowColor="#66000000"
+            fab:menu_shadowColor="#0476C7"
             fab:menu_shadowRadius="4dp"
             fab:menu_shadowXOffset="1dp"
             fab:menu_shadowYOffset="3dp"
@@ -100,7 +100,7 @@
                 android:id="@+id/button_start_working"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@mipmap/ic_backup"
+                android:src="@drawable/clock50"
                 fab:fab_label="Start Working"
                 fab:fab_size="mini" />
 
@@ -110,7 +110,7 @@
                 android:layout_height="wrap_content"
 
                 android:adjustViewBounds="true"
-                android:src="@drawable/sticker4646"
+                android:src="@drawable/finish_icon"
                 fab:fab_label="Finish Working"
                 fab:fab_size="mini" />
         </com.github.clans.fab.FloatingActionMenu>
