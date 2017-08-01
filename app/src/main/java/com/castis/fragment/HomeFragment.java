@@ -1,15 +1,38 @@
 package com.castis.fragment;
 
 import android.app.Activity;
+import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.castis.activity.R;
+import com.castis.model.ChatMessage;
+import com.castis.utils.Constants;
+import com.castis.utils.PreferenceUtils;
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+
+import hani.momanii.supernova_emoji_library.Actions.EmojIconActions;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -28,6 +51,17 @@ public class HomeFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+
+    // Chat view
+    private static int SIGN_IN_REQUEST_CODE = 1;
+    private FirebaseListAdapter<ChatMessage> adapter;
+    RelativeLayout activity_chat;
+    // Emojicon
+    EmojiconEditText emojiconEditText;
+    ImageView emojiButton, submitButton;
+    EmojIconActions emojIconActions;
+    ListView listOfMessage;
 
     private OnFragmentInteractionListener mListener;
 
@@ -71,6 +105,8 @@ public class HomeFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
     }
 
     @Override
@@ -80,6 +116,62 @@ public class HomeFragment extends Fragment {
         String initMessage =  getActivity().getIntent().getStringExtra("message");
         if (null != initMessage) {
             message_textview.setText(initMessage);
+        }
+
+        activity_chat = (RelativeLayout)getView().findViewById(R.id.activity_main_chat);
+
+        listOfMessage = (ListView)getView().findViewById(R.id.list_of_message);
+
+        //Add Emoji
+        emojiButton = (ImageView)getView().findViewById(R.id.emoji_button);
+        submitButton = (ImageView)getView().findViewById(R.id.submit_button);
+        emojiconEditText = (EmojiconEditText)getView().findViewById(R.id.emojicon_edit_text);
+        emojIconActions = new EmojIconActions(getActivity().getApplicationContext(),activity_chat,emojiButton,emojiconEditText);
+        emojIconActions.ShowEmojicon();
+
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (emojiconEditText.getText().toString() != null
+                        && emojiconEditText.getText().toString().length() > 0) {
+
+                    FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(emojiconEditText.getText().toString(),
+                            FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+                    emojiconEditText.setText("");
+                    emojiconEditText.requestFocus();
+                }
+            }
+        });
+
+
+        //Check if not sign-in then navigate Signin page
+        if(FirebaseAuth.getInstance().getCurrentUser() == null)
+        {
+
+            /*startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder().build(),SIGN_IN_REQUEST_CODE);*/
+            String email = PreferenceUtils.getInstance(getActivity().getBaseContext()).getSharedPref().getString("email","");
+            String password = PreferenceUtils.getInstance(getActivity().getBaseContext()).getSharedPref().getString("password", Constants.DEFAULT_PASSWORD);
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(
+                            new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isComplete()) {
+                                        Toast.makeText(getActivity().getBaseContext(), "login successfully", Toast.LENGTH_LONG);
+                                        displayChatMessage();
+                                    } else {
+                                        Toast.makeText(getActivity().getBaseContext(), "login fail", Toast.LENGTH_LONG);
+                                    }
+                                }
+                            }
+                    );
+
+        }
+        else
+        {
+//            Snackbar.make(activity_chat,"Welcome "+FirebaseAuth.getInstance().getCurrentUser().getEmail(),Snackbar.LENGTH_SHORT).show();
+            //Load content
+            displayChatMessage();
         }
     }
 
@@ -143,5 +235,45 @@ public class HomeFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    private void displayChatMessage() {
+
+
+        adapter = new FirebaseListAdapter<ChatMessage>(getActivity(),ChatMessage.class,R.layout.list_item, FirebaseDatabase.getInstance().getReference().limitToLast(50))
+        {
+            @Override
+            protected void populateView(View v, ChatMessage model, int position) {
+
+                //Get references to the views of list_item.xml
+                TextView messageText, messageUser, messageTime;
+                messageText = (EmojiconTextView) v.findViewById(R.id.message_text);
+                messageUser = (TextView) v.findViewById(R.id.message_user);
+                messageTime = (TextView) v.findViewById(R.id.message_time);
+
+                messageText.setText(model.getMessageText());
+                messageUser.setText(model.getMessageUser());
+                messageTime.setText(DateFormat.format("dd-MM-yyyy (HH:mm:ss)", model.getMessageTime()));
+
+            }
+        };
+        listOfMessage.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        listOfMessage.setAdapter(adapter);
+        adapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                listOfMessage.setSelection(adapter.getCount() - 1);
+            }
+        });
+
+        listOfMessage.setSelection(adapter.getCount() -1);
+        listOfMessage.post(new Runnable() {
+            @Override
+            public void run() {
+                // Select the last row so it will scroll into view...
+                listOfMessage.setSelection(adapter.getCount() - 1);
+            }
+        });
     }
 }

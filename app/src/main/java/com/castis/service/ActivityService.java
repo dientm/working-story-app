@@ -22,6 +22,8 @@ import com.castis.utils.PreferenceUtils;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import org.w3c.dom.Text;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,14 +47,14 @@ public class ActivityService implements AsyncResponse {
     private void reload() {
         URL url = null;
         try {
-            url = new URL(Constants.ACTIVITIES_URL);
+            url = new URL(PreferenceUtils.getInstance(ctx).getSharedPref().getString(Constants.SERVER, Constants.DEFAULT_SERVER) + Constants.GET_LIST_USER_STATUS);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
         HttpRequest request = new HttpRequest();
         request.setUrl(url);
         request.setMethod("GET");
-        new RequestService(this).execute(request);
+        new RequestService(this, this.ctx).execute(request);
     }
 
     @Override
@@ -66,13 +68,11 @@ public class ActivityService implements AsyncResponse {
             if (activities == null) {
 
             } else {
-                view = (ListView) ((Activity)ctx).findViewById(R.id.timeline_activity);
+//                view = (ListView) ((Activity)ctx).findViewById(R.id.timeline_activity);
                 int i = 1;
                 List<String[]> activityList = new ArrayList<String[]>();
                 for (ActivityDto activityDto : activities) {
                     activityList.add(activityDto.toStringArr());
-
-
                 }
 
                 ActivityTextViewAdapter adapter = new ActivityTextViewAdapter(ctx, activities);
@@ -93,27 +93,19 @@ public class ActivityService implements AsyncResponse {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            // Get the data item for this position
-            ActivityDto activity_item = getItem(position);
-            // Check if an existing view is being reused, otherwise inflate the view
+            ActivityDto activityDto = getItem(position);
             if (convertView == null) {
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_activies_timeline, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_status_layout, parent, false);
             }
-            // Lookup view for data population
-            /*TextView name = (TextView) convertView.findViewById(R.id.name);*/
-            ImageView avatar = (ImageView) convertView.findViewById(R.id.avatar);
-            TextView action = (TextView) convertView.findViewById(R.id.action);
-            TextView action_on = (TextView) convertView.findViewById(R.id.action_on);
-            // Populate the data into the template view using the data object
-            /*name.setText(activity_item.getName());*/
-            if (activity_item.getNote() != null) {
-                action.setText(activity_item.getName() + " : " + activity_item.getAction() + " \n\r" + activity_item.getNote());
+
+            TextView username = (TextView) convertView.findViewById((R.id.username));
+            username.setText(activityDto.getUsername());
+            ImageView imageView = (ImageView) convertView.findViewById(R.id.status_image);
+            if (activityDto.getIs_working().equals("true")) {
+                Picasso.with(getContext()).load(R.drawable.smiley).into(imageView);
             } else {
-                action.setText(activity_item.getName() + " : " + activity_item.getAction());
+                Picasso.with(getContext()).load(R.drawable.custom_sleep).into(imageView);
             }
-            Picasso.with(ctx).load(Constants.GET_AVATAR_URL + activity_item.getUsername()).resize(100,100).into(avatar);
-            action_on.setText(activity_item.getAction_on());
-            // Return the completed view to render on screen
             return convertView;
         }
     }

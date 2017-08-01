@@ -3,14 +3,20 @@ package com.castis.model;
 /**
  * Created by trand on 6/28/2017.
  */
-
 public class ActivityDto {
     private String username;
 
     private String name;
-    private String action;
-    private String action_on;
-    private String note;
+    private String is_working;
+
+
+    public String getIs_working() {
+        return is_working;
+    }
+
+    public void setIs_working(String is_working) {
+        this.is_working = is_working;
+    }
 
     public String getName() {
         return name;
@@ -20,29 +26,6 @@ public class ActivityDto {
         this.name = name;
     }
 
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-
-    public String getAction_on() {
-        return action_on;
-    }
-
-    public void setAction_on(String action_on) {
-        this.action_on = action_on;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
     public String getUsername() {
         return username;
     }
@@ -52,10 +35,11 @@ public class ActivityDto {
     }
 
     public String toString() {
-        String mess =  "" + this.name + " has " + this.action + " at " + this.action_on;
-        return mess;
+        return name;
     }
+
     public String[] toStringArr() {
-        return new String[]{name, action, action_on, note};
+        return new String[]{name};
     }
 }
+

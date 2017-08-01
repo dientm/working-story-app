@@ -1,0 +1,57 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#31459f"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.castis.activity.ConfigurationActivity">
+
+
+    <TextView
+
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+
+        android:textColor="#fefefe"
+        android:text="Enter server address" />
+
+
+    <EditText
+        android:id="@+id/server_address"
+        android:layout_marginTop="5dp"
+        android:padding="10dp"
+        android:textSize="16dp"
+
+        android:background="@drawable/edit_text_noborder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/http_hint"
+        android:imeActionLabel="@string/action_sign_in_short"
+        android:imeOptions="actionUnspecified"
+        android:inputType="textUri"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textColorHighlight="?android:attr/editTextColor"
+        android:textColorLink="@android:color/background_light" />
+
+    <Button
+        android:id="@+id/update_server_address_button"
+        android:background="@drawable/button_custom_background"
+        android:textColor="#fefefe"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/action_update"
+        />
+
+
+</LinearLayout>

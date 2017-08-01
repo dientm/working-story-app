@@ -1,6 +1,7 @@
 package com.castis.activity;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,10 @@ import com.castis.service.HttpRequest;
 import com.castis.service.RequestService;
 import com.castis.utils.Constants;
 import com.castis.utils.PreferenceUtils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -43,7 +48,7 @@ public class RegisterActivity extends AppCompatActivity implements RequestServic
         setContentView(R.layout.activity_register);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material);
         toolbar.setTitle("Register");
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,7 +76,7 @@ public class RegisterActivity extends AppCompatActivity implements RequestServic
         // do login
         URL url = null;
         try {
-            url = new URL(Constants.REGISTER_URL);
+            url = new URL(PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPref().getString(Constants.SERVER, Constants.DEFAULT_SERVER) + Constants.REGISTER_URI);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -89,7 +94,7 @@ public class RegisterActivity extends AppCompatActivity implements RequestServic
         request.setUrl(url);
         request.setMethod("POST");
         request.setPayLoad(jsonBody);
-        new RequestService(this).execute(request);
+        new RequestService(this, getApplicationContext()).execute(request);
     }
 
     @Override
@@ -107,9 +112,29 @@ public class RegisterActivity extends AppCompatActivity implements RequestServic
             Log.e(TAG, e.toString());
         }
         if (obj.getStatusCode() == 200) {
-            Toast.makeText(getBaseContext(), "Register successfully", Toast.LENGTH_LONG).show();
-            Intent i = new Intent(RegisterActivity.this, LoginActivity.class);
-            startActivity(i);
+
+            // register Firebase service
+            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+            mAuth.createUserWithEmailAndPassword(email.getText().toString(), Constants.DEFAULT_PASSWORD)
+                    .addOnCompleteListener(
+                            new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful() ) {
+                                        Toast.makeText(getBaseContext(), "Register successfully", Toast.LENGTH_LONG).show();
+                                        Intent i = new Intent(RegisterActivity.this, LoginActivity.class);
+                                        startActivity(i);
+                                    } else {
+                                        Toast.makeText(getBaseContext(), "Register to Firebase Fail.", Toast.LENGTH_LONG).show();
+                                        Intent i = new Intent(RegisterActivity.this, LoginActivity.class);
+                                        startActivity(i);
+                                    }
+                                }
+                            }
+                    );
+
+
+
         }
     }
 }

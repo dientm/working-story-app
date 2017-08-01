@@ -6,7 +6,7 @@
             android:id="@+id/nav_dashboard"
             android:icon="@drawable/icon_dashboard"
             android:title="Dashboard" />
-        <item
+        <!--<item
             android:id="@+id/nav_profile"
             android:icon="@drawable/icon_profile"
             android:title="Profile" />
@@ -17,15 +17,15 @@
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="Manager" />-->
     </group>
 
     <item android:title="Communicate">
         <menu>
             <item
-                android:id="@+id/nav_share"
+                android:id="@+id/nar_report"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Report Bug" />
+                android:title="Working Report" />
             <item
                 android:id="@+id/nav_logout"
                 android:icon="@drawable/logout_variant"

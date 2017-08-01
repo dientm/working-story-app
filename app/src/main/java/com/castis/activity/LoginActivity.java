@@ -41,6 +41,7 @@ import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -73,7 +74,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
     private TextView register_link;
-
+    private TextView change_config_link;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,6 +114,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(i);
+            }
+        });
+
+        // change server address
+        change_config_link = (TextView) findViewById(R.id.change_config_link);
+        change_config_link.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(LoginActivity.this, ConfigurationActivity.class);
                 startActivity(i);
             }
         });
@@ -174,7 +185,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // do login
             URL url = null;
             try {
-                url = new URL(Constants.LOGIN_URL);
+                url = new URL(PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPref().getString(Constants.SERVER, Constants.DEFAULT_SERVER) + Constants.LOGIN_URI);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -191,7 +202,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             request.setUrl(url);
             request.setMethod("POST");
             request.setPayLoad(jsonBody);
-            new RequestService(this).execute(request);
+            new RequestService(this, getApplicationContext()).execute(request);
 
             /*mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);*/
@@ -301,6 +312,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 e.printStackTrace();
             }
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("username", user.getUsername());
+            PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("password", "qwerasdf");
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("name", user.getName());
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("email", user.getEmail());
             PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPrefEditor().putString("tokenId", obj.getTokenId());

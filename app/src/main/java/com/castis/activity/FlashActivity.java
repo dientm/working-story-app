@@ -59,7 +59,7 @@ public class FlashActivity extends AppCompatActivity implements RequestService.A
         }
         URL url = null;
         try {
-            url = new URL(Constants.BEACON_CONFIG_URL);
+            url = new URL(PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPref().getString(Constants.SERVER, Constants.DEFAULT_SERVER) + Constants.BEACON_CONFIG_URI);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -69,7 +69,7 @@ public class FlashActivity extends AppCompatActivity implements RequestService.A
         request.setUrl(url);
         request.setMethod("GET");
 
-        new RequestService(this).execute(request);
+        new RequestService(this, getApplicationContext()).execute(request);
 
 
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

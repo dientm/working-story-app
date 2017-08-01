@@ -18,7 +18,7 @@ import com.castis.activity.R;
  * Use the {@link ProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ReportFragment extends Fragment {
+public class IncommingFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -30,7 +30,7 @@ public class ReportFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public ReportFragment() {
+    public IncommingFragment() {
         // Required empty public constructor
     }
 
@@ -43,8 +43,8 @@ public class ReportFragment extends Fragment {
      * @return A new instance of fragment ProfileFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ReportFragment newInstance(String param1, String param2) {
-        ReportFragment fragment = new ReportFragment();
+    public static IncommingFragment newInstance(String param1, String param2) {
+        IncommingFragment fragment = new IncommingFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -85,8 +85,8 @@ public class ReportFragment extends Fragment {
      * Returns a new instance of this fragment for the given section
      * number.
      */
-    public static ReportFragment newInstance(int sectionNumber) {
-        ReportFragment fragment = new ReportFragment();
+    public static IncommingFragment newInstance(int sectionNumber) {
+        IncommingFragment fragment = new IncommingFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);

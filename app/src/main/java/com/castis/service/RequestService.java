@@ -1,11 +1,14 @@
 package com.castis.service;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.castis.model.User;
-
-import org.json.JSONObject;
+import com.castis.activity.FlashActivity;
+import com.castis.activity.LoginActivity;
+import com.castis.utils.PreferenceUtils;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,12 +18,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Exchanger;
 
 /**
  * Created by Mark on 6/24/2017.
@@ -33,6 +30,9 @@ public class RequestService extends AsyncTask<HttpRequest, String, String> {
     HttpURLConnection urlConnection = null;
     BufferedReader reader = null;
     InputStream inputStream = null;
+    Context mContext;
+
+
     @Override
     protected String doInBackground(HttpRequest... httpRequests) {
 
@@ -43,14 +43,14 @@ public class RequestService extends AsyncTask<HttpRequest, String, String> {
                 return sendGet(request);
             }
             return sendPost(request);
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "MalformedURLException: " + e.getMessage());
-        } catch (ProtocolException e) {
-            Log.e(TAG, "ProtocolException: " + e.getMessage());
-        } catch (IOException e) {
-            Log.e(TAG, "IOException: " + e.getMessage());
         } catch (Exception e) {
+            FirebaseAuth.getInstance().signOut();
+            PreferenceUtils.getInstance(mContext).getSharedPrefEditor().clear();
+            PreferenceUtils.getInstance(mContext).getSharedPrefEditor().commit();
+            Intent i = new Intent(mContext, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(i);
             Log.e(TAG, "Exception: " + e.getMessage());
+
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -66,9 +66,11 @@ public class RequestService extends AsyncTask<HttpRequest, String, String> {
                 try {
                     reader.close();
                 } catch (final IOException e) {
-                    Log.e("truong", "Error closing stream", e);
+                    Log.e("TAG", "Error closing stream", e);
                 }
             }
+
+
         }
         return response;
     }
@@ -78,8 +80,9 @@ public class RequestService extends AsyncTask<HttpRequest, String, String> {
     }
     public AsyncResponse asyncResponse = null;
 
-    public RequestService(AsyncResponse asyncResponse){
+    public RequestService(AsyncResponse asyncResponse, Context context){
         this.asyncResponse = asyncResponse;
+        this.mContext = context;
     }
 
     @Override
@@ -94,6 +97,7 @@ public class RequestService extends AsyncTask<HttpRequest, String, String> {
     private String sendGet(HttpRequest request) throws Exception {
         final String USER_AGENT = "Mozilla/5.0";
         HttpURLConnection con = (HttpURLConnection) request.getUrl().openConnection();
+        con.setConnectTimeout(3000);
         con.setRequestMethod("GET");
         con.setRequestProperty("User-Agent", USER_AGENT);
         int responsecode = con.getResponseCode();
@@ -115,6 +119,7 @@ public class RequestService extends AsyncTask<HttpRequest, String, String> {
         con.setRequestMethod("POST");
         con.setRequestProperty("User-Agent", USER_AGENT);
         con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+        con.setConnectTimeout(3000);
         if (null != request.getHeaders()) {
             for (String key : request.getHeaders().keySet()) {
                 con.setRequestProperty(key, request.getHeaders().get(key));

@@ -13,11 +13,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.castis.model.ChatMessage;
 import com.castis.model.ResponseObject;
 import com.castis.service.HttpRequest;
 import com.castis.service.RequestService;
 import com.castis.utils.Constants;
 import com.castis.utils.PreferenceUtils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
@@ -42,7 +45,7 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_finish_working);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material);
         toolbar.setTitle("Finish working");
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,7 +57,8 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
 
         // avatar
         ImageView avatar = (ImageView) findViewById(R.id.avatar);
-        Picasso.with(this).load(Constants.GET_AVATAR_URL + PreferenceUtils.getInstance(this).getSharedPref().getString("username", "")).resize(100,100).into(avatar);
+        Picasso.with(this).load(PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPref().getString(Constants.SERVER, Constants.DEFAULT_SERVER) + Constants.GET_AVATAR_URI
+                + PreferenceUtils.getInstance(this).getSharedPref().getString("username", "")).resize(100, 100).into(avatar);
         // set time counter
         TextView current_time_view = (TextView) findViewById(R.id.current_time);
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -142,7 +146,8 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
         String strReport = report.getText().toString();
         URL url = null;
         try {
-            url = new URL(Constants.WORKING_ACTION_URL);
+
+            url = new URL(PreferenceUtils.getInstance(this.getApplicationContext()).getSharedPref().getString(Constants.SERVER, Constants.DEFAULT_SERVER) + Constants.WORKING_ACTION_URI);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -162,7 +167,7 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
         request.setUrl(url);
         request.setMethod("POST");
         request.setPayLoad(jsonBody);
-        new RequestService(this).execute(request);
+        new RequestService(this, getApplicationContext()).execute(request);
     }
 
 
@@ -186,11 +191,18 @@ public class FinishWorkingActivity extends AppCompatActivity implements RequestS
             Log.e(TAG, e.toString());
         }
         if (obj.getStatusCode() == 200) {
+            FirebaseDatabase.getInstance().getReference().push().setValue(
+                    new ChatMessage(
+                            PreferenceUtils.getInstance(getApplicationContext()).getSharedPref().getString("name", "")
+                                    + " has finished working",
+//                    FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+                            "bot@castis.com"));
+
             Thread.sleep(1000);
             hideDialog();
             Toast.makeText(getBaseContext(), "Done", Toast.LENGTH_LONG).show();
             Intent i = new Intent(FinishWorkingActivity.this, MainActivity.class);
-            i.putExtra ("message", obj.getMessage());
+            i.putExtra("message", obj.getMessage());
             startActivity(i);
         } else {
 

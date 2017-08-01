@@ -10,17 +10,19 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Type Your Message : "
+        android:text="It seems you are not in the office. Please put your location and reason to inform manager "
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <EditText
         android:id="@+id/note"
         android:layout_width="match_parent"
+        android:hint="reason"
         android:layout_height="wrap_content" >
         <requestFocus />
     </EditText>
     <EditText
         android:id="@+id/location"
+        android:hint="location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
     </EditText>

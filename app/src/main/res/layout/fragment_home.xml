@@ -1,25 +1,14 @@
-
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/fragment_home"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-
-    >
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-
         android:background="@drawable/custom_background_grayonly"
         tools:context="com.castis.fragment.HomeFragment">
 
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="30dp"
             android:background="@drawable/custom_background_light"
             android:id="@+id/linearLayout">
 
@@ -28,11 +17,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:paddingBottom="5dp"
+                android:paddingBottom="2dp"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
-                android:paddingTop="5dp"
+                android:paddingTop="2dp"
                 android:gravity="center"
+
                 android:text="How are you today?"
                 android:textColor="@color/bright_foreground_material_light"
                 android:textSize="18sp" />
@@ -40,7 +30,7 @@
 
         </LinearLayout>
 
-        <ListView
+        <!--<ListView
             android:id="@+id/timeline_activity"
             android:layout_width="match_parent"
             android:layout_height="300dp"
@@ -68,9 +58,73 @@
             android:layout_alignParentStart="true">
 
 
-        </LinearLayout>
+        </LinearLayout>-->
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/activity_main_chat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/custom_background_soft_green"
+            android:descendantFocusability="beforeDescendants"
+            android:focusableInTouchMode="true"
 
+            tools:context="com.castis.activity.MainActivity">
+
+            <ImageView
+                android:id="@+id/emoji_button"
+                android:padding="4dp"
+                android:src="@mipmap/smiley"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/edit_text_noborder"
+                />
+
+            <ImageView
+                android:id="@+id/submit_button"
+                android:padding="4dp"
+                android:src="@android:drawable/ic_menu_send"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/edit_text_noborder"
+                />
+
+
+            <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
+                android:id="@+id/emojicon_edit_text"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/emoji_button"
+                android:layout_toLeftOf="@+id/submit_button"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/edit_text_noborder"
+
+                app:emojiconSize="28sp"
+                />
+
+            <ListView
+                android:id="@+id/list_of_message"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_above="@+id/emojicon_edit_text"
+                android:dividerHeight="16dp"
+                android:divider="@android:color/transparent"
+                android:layout_marginBottom="16dp"
+                android:stackFromBottom="true"
+                android:transcriptMode="alwaysScroll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:textSize="8sp">
+
+            </ListView>
+        </RelativeLayout>
     </RelativeLayout>
-</ScrollView>
 
 
